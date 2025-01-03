@@ -7,6 +7,12 @@ import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@
 import { Loader } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function formatPosition(str: String) {
     return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); 
@@ -77,64 +83,73 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gray-100">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-800">Admin Election Dashboard</h1>
-        <Button variant="outline" onClick={handleLogout} className="bg-yellow-500/90" disabled={loggingOut}>
-          {loggingOut ? <Loader className="animate-spin mr-2" /> : "Logout"}
-        </Button>
-      </div>
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader className="w-10 h-10 text-gray-600 animate-spin" />
+    <TooltipProvider>
+      <div className="min-h-screen p-8 bg-gray-100">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-4xl font-bold text-gray-800">Admin Election Dashboard</h1>
+          <Button variant="outline" onClick={handleLogout} className="bg-yellow-500/90" disabled={loggingOut}>
+            {loggingOut ? <Loader className="animate-spin mr-2" /> : "Logout"}
+          </Button>
         </div>
-      ) : (
-        <div className="space-y-8">
-          {Object.entries(electionData).map(([position, candidates]) => (
-            <Card className="bg-white shadow-md rounded-lg p-4" key={position}>
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold">{formatPosition(position)}'s Office</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <Table className="w-full border">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="bg-gray-200 text-gray-700">Candidate Name</TableHead>
-                      <TableHead className="bg-gray-200 text-gray-700">Vote Count</TableHead>
-                      <TableHead className="bg-gray-200 text-gray-700">Voters (IDs)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {candidates.map((candidate: { name: string; votes: number; voters: string[] }) => (
-                      <TableRow key={candidate.name} className="even:bg-gray-50">
-                        <TableCell className="p-3">{candidate.name}</TableCell>
-                        <TableCell className="p-3">{candidate.votes}</TableCell>
-                        <TableCell className="p-3">
-                          <div className="flex flex-wrap gap-2">
-                            {candidate.voters.slice(0, expandedCandidate === candidate.name ? candidate.voters.length : 5).map((voter, index) => (
-                              <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
-                                {voter}
-                              </span>
-                            ))}
-                            {candidate.voters.length > 5 && (
-                              <Button variant="outline" onClick={() => toggleExpanded(candidate.name)}>
-                                {expandedCandidate === candidate.name ? "Show Less" : "Show More"}
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader className="w-10 h-10 text-gray-600 animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(electionData).map(([position, candidates]) => (
+              <Card className="bg-white shadow-md rounded-lg p-4" key={position}>
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold">{formatPosition(position)}'s Office</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <Table className="w-full border">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="bg-gray-200 text-gray-700">Candidate Name</TableHead>
+                        <TableHead className="bg-gray-200 text-gray-700">Vote Count</TableHead>
+                        <TableHead className="bg-gray-200 text-gray-700">Voters (IDs)</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          ))}
+                    </TableHeader>
+                    <TableBody>
+                      {candidates.map((candidate: { name: string; votes: number; voters: string[] }) => (
+                        <TableRow key={candidate.name} className="even:bg-gray-50">
+                          <TableCell className="p-3">{candidate.name}</TableCell>
+                          <TableCell className="p-3">{candidate.votes}</TableCell>
+                          <TableCell className="p-3">
+                            <div className="flex flex-wrap gap-2">
+                              {candidate.voters.slice(0, expandedCandidate === candidate.name ? candidate.voters.length : 5).map((voter, index) => (
+                                <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                                  {voter}
+                                </span>
+                              ))}
+                              {candidate.voters.length > 5 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button variant="outline" onClick={() => toggleExpanded(candidate.name)}>
+                                      {expandedCandidate === candidate.name ? "Show Less" : "Show More"}
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{candidate.voters.join(', ')}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+        <div className="flex justify-center mt-10">
+          <Button variant="outline" onClick={() => window.location.reload()}>Refresh Data</Button>
         </div>
-      )}
-      <div className="flex justify-center mt-10">
-        <Button variant="outline" onClick={() => window.location.reload()}>Refresh Data</Button>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
