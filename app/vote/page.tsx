@@ -19,7 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState, Suspense } from "react";
-import { Loader } from "lucide-react"; // Placeholder for a loading spinner
+import { Loader } from "lucide-react";
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -28,11 +28,42 @@ const FormSchema = z.object({
   pin: z.string().min(4, { message: "Pin must be at least 4 characters." }),
 });
 
+// Election schedule mapping
+const ELECTION_SCHEDULE = {
+  'president': { date: 6, positions: ['president', 'vice-president'] },
+  'vice-president': { date: 6, positions: ['president', 'vice-president'] },
+  'secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
+  'assistant-secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
+  'treasurer': { date: 8, positions: ['treasurer', 'financial-secretary'] },
+  'financial-secretary': { date: 8, positions: ['treasurer', 'financial-secretary'] },
+  'organizing-secretary': { date: 9, positions: ['organizing-secretary', 'public-relation-officer'] },
+  'public-relation-officer': { date: 9, positions: ['organizing-secretary', 'public-relation-officer'] },
+  'legal-adviser': { date: 10, positions: ['legal-adviser', 'provost-marshal'] },
+  'provost-marshal': { date: 10, positions: ['legal-adviser', 'provost-marshal'] }
+};
+
 function formatPosition(str: string) {
-    return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); 
+  return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-const organizationColor = "#cfa83a";
+function isVotingOpenForPosition(position: string): boolean {
+  const currentDate = new Date();
+  const currentDay = currentDate.getDate();
+  const currentHour = currentDate.getHours();
+  
+  // Get the schedule for the current position
+  const schedule = ELECTION_SCHEDULE[position.toLowerCase()];
+  
+  if (!schedule) return false;
+  
+  // Check if today is the correct day for this position
+  if (currentDate.getMonth() === 0 && currentDay === schedule.date) { // January (0-based month)
+    // Voting hours: 8 AM to 8 PM (20:00)
+    return currentHour >= 8 && currentHour < 20;
+  }
+  
+  return false;
+}
 
 export default function InputForm() {
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -77,16 +108,21 @@ function InputFormWithParams({
   const [isVotingOpen, setIsVotingOpen] = useState(false);
 
   useEffect(() => {
-    const currentDate = new Date();
-    const votingStartDate = new Date(currentDate.getFullYear(), 0, 6, 8); // January 6th, 8AM
-    const votingEndDate = new Date(currentDate.getFullYear(), 0, 10, 20); // January 10th, 8PM
+    if (position) {
+      const checkVotingStatus = () => {
+        const votingOpen = isVotingOpenForPosition(position);
+        setIsVotingOpen(votingOpen);
+      };
 
-    if (currentDate >= votingStartDate && currentDate <= votingEndDate) {
-      setIsVotingOpen(true);
-    } else {
-      setIsVotingOpen(false);
+      // Initial check
+      checkVotingStatus();
+
+      // Set up an interval to check every minute
+      const interval = setInterval(checkVotingStatus, 60000);
+
+      return () => clearInterval(interval);
     }
-  }, []);
+  }, [position]);
 
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -111,6 +147,15 @@ function InputFormWithParams({
   });
 
   const onSubmit = async (data: { name: string; voterId: string; candidate: string; pin: string }) => {
+    // Recheck voting status before submitting
+    if (!isVotingOpen) {
+      toast({
+        title: "Voting Closed",
+        description: "Voting is not currently open for this position.",
+      });
+      return;
+    }
+
     setSubmitting(true);
     const { name, voterId, candidate, pin } = data;
 
@@ -176,9 +221,30 @@ function InputFormWithParams({
     setSubmitting(false);
   };
 
+  const getVotingStatusMessage = () => {
+    if (!position || !ELECTION_SCHEDULE[position.toLowerCase()]) {
+      return "Invalid position";
+    }
+    
+    const schedule = ELECTION_SCHEDULE[position.toLowerCase()];
+    const currentDate = new Date();
+    const votingDate = new Date(currentDate.getFullYear(), 0, schedule.date);
+    const today = new Date();
+    
+    if (today.getDate() === schedule.date && today.getMonth() === 0) {
+      if (!isVotingOpen) {
+        return "Voting is only open from 8 AM to 8 PM";
+      }
+    } else if (today < votingDate) {
+      return `Voting for this position opens on January ${schedule.date}`;
+    } else {
+      return `Voting for this position has ended`;
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-2xl" style={{ borderColor: organizationColor }}>
+      <Card className="w-full max-w-2xl" style={{ borderColor: "#cfa83a" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Cast Your Vote for the {formatPosition(position!)}'s Office
@@ -188,6 +254,7 @@ function InputFormWithParams({
           {isVotingOpen ? (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {/* Rest of the form components remain the same */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
                   <FormField
                     control={form.control}
@@ -289,7 +356,7 @@ function InputFormWithParams({
               </form>
             </Form>
           ) : (
-            <p className="text-xl text-center text-red-500">Voting closed/voting not open yet</p>
+            <p className="text-xl text-center text-red-500">{getVotingStatusMessage()}</p>
           )}
         </CardContent>
       </Card>
