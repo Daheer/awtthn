@@ -54,7 +54,7 @@ export default function AdminDashboard() {
         acc[candidate.position].push({
           name: candidate.name,
           votes: candidate.votes.length,
-          voters: candidate.votes.map(vote => vote.voter_id)
+          voters: candidate.votes.map(vote => vote.voter_id).filter(voterId => voterId !== null) // Pf542
         });
         return acc;
       }, [] as any[]);
@@ -105,13 +105,28 @@ export default function AdminDashboard() {
                         <TableCell className="p-3">{candidate.name}</TableCell>
                         <TableCell className="p-3">{candidate.votes}</TableCell>
                         <TableCell className="p-3">
-                          <div className="flex flex-wrap gap-2">
-                            {candidate.voters.map((voter, index) => (
-                              <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
-                                {voter}
-                              </span>
-                            ))}
-                          </div>
+                          {candidate.votes > 5 ? (
+                            <div className="relative group">
+                              <span className="cursor-pointer">...</span>
+                              <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg p-4 hidden group-hover:block">
+                                <div className="flex flex-wrap gap-2">
+                                  {candidate.voters.map((voter, index) => (
+                                    <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                                      {voter}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {candidate.voters.map((voter, index) => (
+                                <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                                  {voter}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
