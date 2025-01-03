@@ -108,7 +108,7 @@ export default function AdminDashboard() {
                         <TableCell className="p-3">
                           <div className="flex flex-wrap gap-2">
                             {candidate.voters.slice(0, 5).map((voter, index) => (
-                              <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                              <span key={index} className="inline-block bg-gray-200 rounded-sm px-5 py-2 text-lg font-medium text-gray-700">
                                 {voter}
                               </span>
                             ))}
