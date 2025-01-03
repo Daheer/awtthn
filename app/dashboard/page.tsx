@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [expandedCandidate, setExpandedCandidate] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
         acc[candidate.position].push({
           name: candidate.name,
           votes: candidate.votes.length,
-          voters: candidate.votes.map(vote => vote.voter_id)
+          voters: candidate.votes.map(vote => vote.voter_id).filter(id => id !== null)
         });
         return acc;
       }, [] as any[]);
@@ -69,6 +70,10 @@ export default function AdminDashboard() {
     await supabase.auth.signOut();
     setLoggingOut(false);
     router.push('/');
+  };
+
+  const toggleExpanded = (candidateName: string) => {
+    setExpandedCandidate(expandedCandidate === candidateName ? null : candidateName);
   };
 
   return (
@@ -106,11 +111,16 @@ export default function AdminDashboard() {
                         <TableCell className="p-3">{candidate.votes}</TableCell>
                         <TableCell className="p-3">
                           <div className="flex flex-wrap gap-2">
-                            {candidate.voters.map((voter, index) => (
+                            {candidate.voters.slice(0, expandedCandidate === candidate.name ? candidate.voters.length : 5).map((voter, index) => (
                               <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
                                 {voter}
                               </span>
                             ))}
+                            {candidate.voters.length > 5 && (
+                              <Button variant="outline" onClick={() => toggleExpanded(candidate.name)}>
+                                {expandedCandidate === candidate.name ? "Show Less" : "Show More"}
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
