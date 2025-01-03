@@ -28,8 +28,15 @@ const FormSchema = z.object({
   pin: z.string().min(4, { message: "Pin must be at least 4 characters." }),
 });
 
+type ElectionScheduleType = {
+  [key: string]: {
+    date: number;
+    positions: string[];
+  }
+};
+
 // Election schedule mapping
-const ELECTION_SCHEDULE = {
+const ELECTION_SCHEDULE: ElectionScheduleType = {
   'president': { date: 6, positions: ['president', 'vice-president'] },
   'vice-president': { date: 6, positions: ['president', 'vice-president'] },
   'secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
@@ -64,7 +71,6 @@ function isVotingOpenForPosition(position: string): boolean {
   
   return false;
 }
-
 export default function InputForm() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loadingCandidates, setLoadingCandidates] = useState(true);
