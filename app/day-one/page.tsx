@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
+import { isVotingOpenForPosition, ELECTION_SCHEDULE } from '../vote/page';
 
 export default function DayOne() {
     const router = useRouter();
@@ -24,6 +25,28 @@ export default function DayOne() {
 
     const handleVoteClick = (position: string) => {
         router.push(`/vote?position=${encodeURIComponent(position)}`);
+    };
+
+    const getVotingStatusMessage = () => {
+        const position = 'president'; // Example position, adjust as needed
+        if (!position || !ELECTION_SCHEDULE[position.toLowerCase()]) {
+            return "Invalid position";
+        }
+        
+        const schedule = ELECTION_SCHEDULE[position.toLowerCase()];
+        const currentDate = new Date();
+        const votingDate = new Date(currentDate.getFullYear(), 0, schedule.date);
+        const today = new Date();
+        
+        if (today.getDate() === schedule.date && today.getMonth() === 0) {
+            if (!isVotingOpen) {
+                return "Voting is only open from 8 AM to 8 PM";
+            }
+        } else if (today < votingDate) {
+            return `Voting for this position opens on January ${schedule.date}`;
+        } else {
+            return `Voting for this position has ended`;
+        }
     };
 
     return (
@@ -73,7 +96,7 @@ export default function DayOne() {
                     </Button>
                 </div>
             ) : (
-                <p className="text-xl text-center text-red-500">Voting closed/voting not open yet</p>
+                <p className="text-xl text-center text-red-500">{getVotingStatusMessage()}</p>
             )}
         </div>
     );
