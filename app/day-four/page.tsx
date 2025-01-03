@@ -3,10 +3,24 @@
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
 
 export default function DayOne() {
     const router = useRouter();
     const organizationColor = "#cfa83a";
+    const [isVotingOpen, setIsVotingOpen] = useState(false);
+
+    useEffect(() => {
+        const currentDate = new Date();
+        const votingStartDate = new Date(currentDate.getFullYear(), 0, 9, 8); // January 9th, 8AM
+        const votingEndDate = new Date(currentDate.getFullYear(), 0, 9, 20); // January 9th, 8PM
+
+        if (currentDate >= votingStartDate && currentDate <= votingEndDate) {
+            setIsVotingOpen(true);
+        } else {
+            setIsVotingOpen(false);
+        }
+    }, []);
 
     const handleVoteClick = (position: string) => {
         router.push(`/vote?position=${encodeURIComponent(position)}`);
@@ -35,28 +49,32 @@ export default function DayOne() {
             </h1>
 
             {/* Voting Buttons */}
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
-                <Button
-                    variant="outline"
-                    className="p-4 md:p-8 text-lg w-full md:w-auto border"
-                    style={{
-                        borderColor: organizationColor,
-                    }}
-                    onClick={() => handleVoteClick('organizing-secretary')}
-                >
-                    Vote for Organizing Secretary
-                </Button>
-                <Button
-                    variant="outline"
-                    className="p-4 md:p-8 text-lg w-full md:w-auto border"
-                    style={{
-                        borderColor: organizationColor,
-                    }}
-                    onClick={() => handleVoteClick('pro')}
-                >
-                    Vote for PRO
-                </Button>
-            </div>
+            {isVotingOpen ? (
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+                    <Button
+                        variant="outline"
+                        className="p-4 md:p-8 text-lg w-full md:w-auto border"
+                        style={{
+                            borderColor: organizationColor,
+                        }}
+                        onClick={() => handleVoteClick('organizing-secretary')}
+                    >
+                        Vote for Organizing Secretary
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="p-4 md:p-8 text-lg w-full md:w-auto border"
+                        style={{
+                            borderColor: organizationColor,
+                        }}
+                        onClick={() => handleVoteClick('pro')}
+                    >
+                        Vote for PRO
+                    </Button>
+                </div>
+            ) : (
+                <p className="text-xl text-center text-red-500">Voting closed/voting not open yet</p>
+            )}
         </div>
     );
 }
