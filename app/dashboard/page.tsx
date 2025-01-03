@@ -7,6 +7,7 @@ import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@
 import { Loader } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
+import { Tooltip } from '@radix-ui/react-tooltip';
 
 function formatPosition(str: String) {
     return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); 
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
         acc[candidate.position].push({
           name: candidate.name,
           votes: candidate.votes.length,
-          voters: candidate.votes.map(vote => vote.voter_id)
+          voters: candidate.votes.map(vote => vote.voter_id).filter(voterId => voterId !== null) // Pf542
         });
         return acc;
       }, [] as any[]);
@@ -105,13 +106,30 @@ export default function AdminDashboard() {
                         <TableCell className="p-3">{candidate.name}</TableCell>
                         <TableCell className="p-3">{candidate.votes}</TableCell>
                         <TableCell className="p-3">
-                          <div className="flex flex-wrap gap-2">
-                            {candidate.voters.map((voter, index) => (
-                              <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
-                                {voter}
-                              </span>
-                            ))}
-                          </div>
+                          {candidate.votes > 5 ? (
+                            <Tooltip>
+                              <Tooltip.Trigger asChild>
+                                <span className="cursor-pointer">...</span>
+                              </Tooltip.Trigger>
+                              <Tooltip.Content side="top" align="center" className="bg-white border border-gray-300 rounded-lg shadow-lg p-4">
+                                <div className="flex flex-wrap gap-2">
+                                  {candidate.voters.map((voter, index) => (
+                                    <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                                      {voter}
+                                    </span>
+                                  ))}
+                                </div>
+                              </Tooltip.Content>
+                            </Tooltip>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {candidate.voters.map((voter, index) => (
+                                <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                                  {voter}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
