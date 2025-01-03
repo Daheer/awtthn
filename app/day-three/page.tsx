@@ -73,7 +73,7 @@ export default function DayOne() {
                     </Button>
                 </div>
             ) : (
-                <p className="text-xl text-center text-red-500">Voting closed/voting not open yet</p>
+                <p className="text-xl text-center text-red-500">Voting closed/voting not open yet. Please check back between 8 AM and 8 PM on January 8th.</p>
             )}
         </div>
     );
