@@ -43,8 +43,8 @@ const ELECTION_SCHEDULE: ElectionScheduleType = {
   'assistant-secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
   'treasurer': { date: 8, positions: ['treasurer', 'financial-secretary'] },
   'financial-secretary': { date: 8, positions: ['treasurer', 'financial-secretary'] },
-  'organizing-secretary': { date: 9, positions: ['organizing-secretary', 'public-relation-officer'] },
-  'public-relation-officer': { date: 9, positions: ['organizing-secretary', 'public-relation-officer'] },
+  'organizing-secretary': { date: 9, positions: ['organizing-secretary', 'pro'] },
+  'public-relation-officer': { date: 9, positions: ['organizing-secretary', 'pro'] },
   'legal-adviser': { date: 10, positions: ['legal-adviser', 'provost-marshal'] },
   'provost-marshal': { date: 10, positions: ['legal-adviser', 'provost-marshal'] }
 };
