@@ -25,6 +25,7 @@ const FormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   voterId: z.string().min(1, { message: "Voter ID is required." }),
   candidate: z.string().min(1, { message: "Please select a candidate." }),
+  pin: z.string().min(4, { message: "Pin must be at least 4 characters." }),
 });
 
 function formatPosition(str: string) {
@@ -93,12 +94,34 @@ function InputFormWithParams({
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
-    defaultValues: { name: "", voterId: "", candidate: "" },
+    defaultValues: { name: "", voterId: "", candidate: "", pin: "" },
   });
 
-  const onSubmit = async (data: { name: string; voterId: string; candidate: string }) => {
+  const onSubmit = async (data: { name: string; voterId: string; candidate: string; pin: string }) => {
     setSubmitting(true);
-    const { name, voterId, candidate } = data;
+    const { name, voterId, candidate, pin } = data;
+
+    const { data: pinData, error: pinError } = await supabase
+      .from('voters')
+      .select('pin')
+      .eq('id', voterId)
+      .maybeSingle();
+
+    if (pinError) {
+      console.error("Error verifying pin:", pinError.message);
+      toast({ title: "Error", description: "Failed to verify your pin." });
+      setSubmitting(false);
+      return;
+    }
+
+    if (!pinData || pinData.pin !== pin) {
+      toast({
+        title: "Invalid Pin",
+        description: "The pin you entered is incorrect.",
+      });
+      setSubmitting(false);
+      return;
+    }
 
     const { data: existingVote, error: checkError } = await supabase
       .from('votes')
@@ -173,6 +196,19 @@ function InputFormWithParams({
                       <FormLabel className="font-medium">Voter ID</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your Voter ID" {...field} className="shadow-sm" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-medium">Pin</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your Pin" {...field} className="shadow-sm" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
