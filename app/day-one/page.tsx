@@ -12,8 +12,8 @@ export default function DayOne() {
 
     useEffect(() => {
         const currentDate = new Date();
-        const votingStartDate = new Date(currentDate.getFullYear(), 0, 3, 8); // January 6th, 8AM
-        const votingEndDate = new Date(currentDate.getFullYear(), 0, 4, 20); // January 6th, 8PM
+        const votingStartDate = new Date(currentDate.getFullYear(), 0, 6, 8); // January 6th, 8AM
+        const votingEndDate = new Date(currentDate.getFullYear(), 0, 6, 20); // January 6th, 8PM
 
         if (currentDate >= votingStartDate && currentDate <= votingEndDate) {
             setIsVotingOpen(true);
