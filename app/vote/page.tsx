@@ -74,6 +74,19 @@ function InputFormWithParams({
 }) {
   const searchParams = useSearchParams();
   const position = searchParams.get('position');
+  const [isVotingOpen, setIsVotingOpen] = useState(false);
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const votingStartDate = new Date(currentDate.getFullYear(), 0, 6, 8); // January 6th, 8AM
+    const votingEndDate = new Date(currentDate.getFullYear(), 0, 10, 20); // January 10th, 8PM
+
+    if (currentDate >= votingStartDate && currentDate <= votingEndDate) {
+      setIsVotingOpen(true);
+    } else {
+      setIsVotingOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -172,108 +185,112 @@ function InputFormWithParams({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-medium">Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your name" {...field} className="shadow-sm" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="voterId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-medium">Voter ID</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your Voter ID" {...field} className="shadow-sm" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="pin"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-medium">Pin</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your Pin" {...field} className="shadow-sm" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+          {isVotingOpen ? (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium">Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your name" {...field} className="shadow-sm" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="voterId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium">Voter ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your Voter ID" {...field} className="shadow-sm" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="pin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium">Pin</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your Pin" {...field} className="shadow-sm" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="candidate"
-                render={({ field }) => (
-                  <FormItem className="space-y-4">
-                    <FormLabel className="font-medium text-lg">Select Your Candidate</FormLabel>
-                    <FormControl>
-                      {loadingCandidates ? (
-                        <div className="flex justify-center items-center py-4">
-                          <Loader className="text-gray-500 w-8 h-8" />
-                        </div>
-                      ) : (
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                        >
-                          {candidates.map((candidate) => (
-                            <FormItem key={candidate.id}>
-                              <FormControl>
-                                <label
-                                  htmlFor={candidate.id}
-                                  className={`relative block rounded-lg border-2 p-4 hover:border-yellow-400 ${
-                                    field.value === candidate.name ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200'
-                                  } transition-all duration-200 cursor-pointer ${
-                                    form.formState.errors.candidate ? 'border-red-500' : ''
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                      <RadioGroupItem
-                                        value={candidate.name}
-                                        id={candidate.id}
-                                        className="sr-only"
-                                      />
-                                      <img src={candidate.image} alt={candidate.name} className="w-24 h-24 rounded-xl object-cover mb-4" />
+                <FormField
+                  control={form.control}
+                  name="candidate"
+                  render={({ field }) => (
+                    <FormItem className="space-y-4">
+                      <FormLabel className="font-medium text-lg">Select Your Candidate</FormLabel>
+                      <FormControl>
+                        {loadingCandidates ? (
+                          <div className="flex justify-center items-center py-4">
+                            <Loader className="text-gray-500 w-8 h-8" />
+                          </div>
+                        ) : (
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                          >
+                            {candidates.map((candidate) => (
+                              <FormItem key={candidate.id}>
+                                <FormControl>
+                                  <label
+                                    htmlFor={candidate.id}
+                                    className={`relative block rounded-lg border-2 p-4 hover:border-yellow-400 ${
+                                      field.value === candidate.name ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200'
+                                    } transition-all duration-200 cursor-pointer ${
+                                      form.formState.errors.candidate ? 'border-red-500' : ''
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center">
+                                        <RadioGroupItem
+                                          value={candidate.name}
+                                          id={candidate.id}
+                                          className="sr-only"
+                                        />
+                                        <img src={candidate.image} alt={candidate.name} className="w-24 h-24 rounded-xl object-cover mb-4" />
+                                      </div>
+                                      <div className="ml-4 text-right">
+                                        <div className="font-semibold text-lg">{candidate.name}</div>
+                                        <div className="text-sm text-gray-500">{formatPosition(candidate.position)}</div>
+                                      </div>
                                     </div>
-                                    <div className="ml-4 text-right">
-                                      <div className="font-semibold text-lg">{candidate.name}</div>
-                                      <div className="text-sm text-gray-500">{formatPosition(candidate.position)}</div>
-                                    </div>
-                                  </div>
-                                </label>
-                              </FormControl>
-                            </FormItem>
-                          ))}
-                        </RadioGroup>
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" variant="outline" className="w-full bg-yellow-500 border-black-400 py-6 text-lg" disabled={submitting}>
-                {submitting ? "Submitting..." : "Submit Vote"}
-              </Button>
-            </form>
-          </Form>
+                                  </label>
+                                </FormControl>
+                              </FormItem>
+                            ))}
+                          </RadioGroup>
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" variant="outline" className="w-full bg-yellow-500 border-black-400 py-6 text-lg" disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit Vote"}
+                </Button>
+              </form>
+            </Form>
+          ) : (
+            <p className="text-xl text-center text-red-500">Voting closed/voting not open yet</p>
+          )}
         </CardContent>
       </Card>
     </div>
