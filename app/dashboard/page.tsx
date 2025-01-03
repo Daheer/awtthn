@@ -7,6 +7,7 @@ import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@
 import { Loader } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
+import { Tooltip } from '@radix-ui/react-tooltip';
 
 function formatPosition(str: String) {
     return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); 
@@ -106,9 +107,11 @@ export default function AdminDashboard() {
                         <TableCell className="p-3">{candidate.votes}</TableCell>
                         <TableCell className="p-3">
                           {candidate.votes > 5 ? (
-                            <div className="relative group">
-                              <span className="cursor-pointer">...</span>
-                              <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg p-4 hidden group-hover:block">
+                            <Tooltip>
+                              <Tooltip.Trigger asChild>
+                                <span className="cursor-pointer">...</span>
+                              </Tooltip.Trigger>
+                              <Tooltip.Content side="top" align="center" className="bg-white border border-gray-300 rounded-lg shadow-lg p-4">
                                 <div className="flex flex-wrap gap-2">
                                   {candidate.voters.map((voter, index) => (
                                     <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
@@ -116,8 +119,8 @@ export default function AdminDashboard() {
                                     </span>
                                   ))}
                                 </div>
-                              </div>
-                            </div>
+                              </Tooltip.Content>
+                            </Tooltip>
                           ) : (
                             <div className="flex flex-wrap gap-2">
                               {candidate.voters.map((voter, index) => (
