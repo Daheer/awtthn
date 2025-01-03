@@ -104,7 +104,7 @@ function InputFormWithParams({
     const { data: pinData, error: pinError } = await supabase
       .from('voters')
       .select('pin')
-      .eq('id', voterId)
+      .eq('voter_id', voterId)
       .maybeSingle();
 
     if (pinError) {
