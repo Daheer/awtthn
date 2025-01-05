@@ -43,8 +43,8 @@ const ELECTION_SCHEDULE: ElectionScheduleType = {
   'assistant-secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
   'treasurer': { date: 8, positions: ['treasurer', 'financial-secretary'] },
   'financial-secretary': { date: 8, positions: ['treasurer', 'financial-secretary'] },
-  'organizing-secretary': { date: 9, positions: ['organizing-secretary', 'pro'] },
-  'pro': { date: 9, positions: ['organizing-secretary', 'pro'] },
+  'organizing-secretary': { date: 5, positions: ['organizing-secretary', 'pro'] },
+  'pro': { date: 5, positions: ['organizing-secretary', 'pro'] },
   'legal-adviser': { date: 10, positions: ['legal-adviser', 'provost-marshal'] },
   'provost-marshal': { date: 10, positions: ['legal-adviser', 'provost-marshal'] }
 };
@@ -66,7 +66,7 @@ function isVotingOpenForPosition(position: string): boolean {
   // Check if today is the correct day for this position
   if (currentDate.getMonth() === 0 && currentDay === schedule.date) { // January (0-based month)
     // Voting hours: 8 AM to 8 PM (20:00)
-    return currentHour >= 8 && currentHour < 20;
+    return currentHour >= 22 && currentHour < 23;
   }
   
   return false;
