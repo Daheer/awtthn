@@ -8,14 +8,20 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Loader } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
-function formatPosition(str) {
+interface Candidate {
+  id: number;
+  name: string;
+  position: string;
+}
+
+function formatPosition(str: string): string {
     return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 export default function DirectVote() {
-  const [candidates, setCandidates] = useState([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [voteInProgress, setVoteInProgress] = useState(false);
   const { toast } = useToast();
@@ -35,22 +41,22 @@ export default function DirectVote() {
           variant: "destructive"
         });
       } else {
-        setCandidates(data);
+        setCandidates(data || []);
       }
       setLoading(false);
     };
     fetchCandidates();
   }, [toast]);
 
-  const handleVote = async (candidate) => {
+  const handleVote = async (candidate: Candidate) => {
     setVoteInProgress(true);
     try {
       const { error } = await supabase
         .from('votes')
         .insert([{ 
-            candidate: candidate.name,
-            voter_id: null,
-         }]);
+          candidate: candidate.name,
+          voter_id: null, 
+        }]);
 
       if (error) {
         throw error;
@@ -62,7 +68,6 @@ export default function DirectVote() {
         variant: "default"
       });
       
-      // Close dialog after successful vote
       setDialogOpen(false);
     } catch (error) {
       console.error("Error casting vote:", error.message);
@@ -124,7 +129,7 @@ export default function DirectVote() {
                           Cancel
                         </Button>
                         <Button
-                          onClick={() => handleVote(selectedCandidate)}
+                          onClick={() => selectedCandidate && handleVote(selectedCandidate)}
                           disabled={voteInProgress}
                         >
                           {voteInProgress ? (
