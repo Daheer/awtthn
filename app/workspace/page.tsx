@@ -69,8 +69,9 @@ export default function DirectVote() {
       });
       
       setDialogOpen(false);
-    } catch (error) {
-      console.error("Error casting vote:", error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      console.error("Error casting vote:", errorMessage);
       toast({
         title: "Error",
         description: "Failed to cast your vote. Please try again.",
@@ -99,7 +100,7 @@ export default function DirectVote() {
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-xl font-bold">{candidate.name}</h2>
+                    <h2 className="text-xl">{candidate.name}</h2>
                   </div>
                   <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>
