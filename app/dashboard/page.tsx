@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [closedPositions, setClosedPositions] = useState<string[]>(["president", "vice-president"]);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
       } else {
         setUser(user);
         await fetchElectionData();
+        await fetchClosedPositions();
       }
     };
     checkUser();
@@ -65,6 +67,30 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
+  const fetchClosedPositions = async () => {
+    const { data, error } = await supabase
+      .from('closed_positions')
+      .select('position');
+
+    if (error) {
+      console.error("Error fetching closed positions:", error.message);
+    } else {
+      setClosedPositions(data.map((item: { position: string }) => item.position));
+    }
+  };
+
+  const handleClosePosition = async (position: string) => {
+    const { error } = await supabase
+      .from('closed_positions')
+      .insert([{ position }]);
+
+    if (error) {
+      console.error("Error closing position:", error.message);
+    } else {
+      setClosedPositions([...closedPositions, position]);
+    }
+  };
+
   const handleLogout = async () => {
     setLoggingOut(true);
     await supabase.auth.signOut();
@@ -90,52 +116,61 @@ export default function AdminDashboard() {
             <Card className="bg-white shadow-md rounded-lg p-4" key={position}>
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold">{formatPosition(position)}'s Office</CardTitle>
+                {!closedPositions.includes(position) && (
+                  <Button variant="outline" onClick={() => handleClosePosition(position)} className="mt-2">
+                    Close Election
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="p-4">
-                <Table className="w-full border">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="bg-gray-200 text-gray-700">Candidate Name</TableHead>
-                      <TableHead className="bg-gray-200 text-gray-700">Vote Count</TableHead>
-                      <TableHead className="bg-gray-200 text-gray-700">Voters (IDs)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {candidates.map((candidate: { name: string; votes: number; voters: string[] }) => (
-                      <TableRow key={candidate.name} className="even:bg-gray-50">
-                        <TableCell className="p-3">{candidate.name}</TableCell>
-                        <TableCell className="p-3">{candidate.votes}</TableCell>
-                        <TableCell className="p-3">
-                          <div className="flex flex-wrap gap-2">
-                            {candidate.voters.slice(0, 5).map((voter, index) => (
-                              <span key={index} className="inline-block bg-gray-200 rounded-sm px-5 py-2 text-sm font-medium text-gray-700">
-                                {voter}
-                              </span>
-                            ))}
-                            {candidate.voters.length > 5 && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button variant="outline">...</Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <div className="flex flex-wrap gap-2">
-                                      {candidate.voters.map((voter, index) => (
-                                        <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
-                                          {voter}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                          </div>
-                        </TableCell>
+                {closedPositions.includes(position) ? (
+                  <div className="text-gray-500 italic">Election closed for this position.</div>
+                ) : (
+                  <Table className="w-full border">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="bg-gray-200 text-gray-700">Candidate Name</TableHead>
+                        <TableHead className="bg-gray-200 text-gray-700">Vote Count</TableHead>
+                        <TableHead className="bg-gray-200 text-gray-700">Voters (IDs)</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {candidates.map((candidate: { name: string; votes: number; voters: string[] }) => (
+                        <TableRow key={candidate.name} className="even:bg-gray-50">
+                          <TableCell className="p-3">{candidate.name}</TableCell>
+                          <TableCell className="p-3">{candidate.votes}</TableCell>
+                          <TableCell className="p-3">
+                            <div className="flex flex-wrap gap-2">
+                              {candidate.voters.slice(0, 5).map((voter, index) => (
+                                <span key={index} className="inline-block bg-gray-200 rounded-sm px-5 py-2 text-sm font-medium text-gray-700">
+                                  {voter}
+                                </span>
+                              ))}
+                              {candidate.voters.length > 5 && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button variant="outline">...</Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <div className="flex flex-wrap gap-2">
+                                        {candidate.voters.map((voter, index) => (
+                                          <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                                            {voter}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           ))}
