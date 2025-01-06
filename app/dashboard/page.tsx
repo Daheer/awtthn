@@ -116,11 +116,6 @@ export default function AdminDashboard() {
             <Card className="bg-white shadow-md rounded-lg p-4" key={position}>
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold">{formatPosition(position)}'s Office</CardTitle>
-                {!closedPositions.includes(position) && (
-                  <Button variant="outline" onClick={() => handleClosePosition(position)} className="mt-2">
-                    Close Election
-                  </Button>
-                )}
               </CardHeader>
               <CardContent className="p-4">
                 {closedPositions.includes(position) ? (
