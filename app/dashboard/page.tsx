@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [closedPositions, setClosedPositions] = useState<string[]>(["president", "vice-president"]);
+  const [closedPositions, setClosedPositions] = useState<string[]>(["president", "vice-president", "secretary-general", "national-assistant-secretary-general"]);
   const router = useRouter();
 
   useEffect(() => {
