@@ -39,8 +39,8 @@ type ElectionScheduleType = {
 const ELECTION_SCHEDULE: ElectionScheduleType = {
   'president': { date: 6, positions: ['president', 'vice-president'] },
   'vice-president': { date: 6, positions: ['president', 'vice-president'] },
-  'secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
-  'assistant-secretary-general': { date: 7, positions: ['secretary-general', 'assistant-secretary-general'] },
+  'secretary-general': { date: 7, positions: ['secretary-general', 'national-assistant-secretary-general'] },
+  'national-assistant-secretary-general': { date: 7, positions: ['secretary-general', 'national-assistant-secretary-general'] },
   'treasurer': { date: 8, positions: ['treasurer', 'financial-secretary'] },
   'financial-secretary': { date: 8, positions: ['treasurer', 'financial-secretary'] },
   'organizing-secretary': { date: 9, positions: ['organizing-secretary', 'pro'] },
