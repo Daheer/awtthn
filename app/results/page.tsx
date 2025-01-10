@@ -5,80 +5,56 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@/components/ui/table";
 import { Loader } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { User } from '@supabase/supabase-js';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function formatPosition(str: String) {
     return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); 
 }
 
-export default function AdminDashboard() {
+export default function ResultsPage() {
   const [electionData, setElectionData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/');
+    const fetchElectionData = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('candidates')
+        .select(`
+          position,
+          name,
+          votes (
+            voter_id
+          )
+        `);
+
+      if (error) {
+        console.error("Error fetching election data:", error.message);
       } else {
-        setUser(user);
-        await fetchElectionData();
+        const groupedData = data.reduce((acc, candidate) => {
+          if (!acc[candidate.position]) {
+            acc[candidate.position] = [];
+          }
+          acc[candidate.position].push({
+            name: candidate.name,
+            votes: candidate.votes.length,
+            voters: candidate.votes.map(vote => vote.voter_id).filter(voter => voter !== null)
+          });
+          return acc;
+        }, [] as any[]);
+
+        setElectionData(groupedData);
       }
+      setLoading(false);
     };
-    checkUser();
-  }, [router]);
 
-  const fetchElectionData = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('candidates')
-      .select(`
-        position,
-        name,
-        votes (
-          voter_id
-        )
-      `);
-
-    if (error) {
-      console.error("Error fetching election data:", error.message);
-    } else {
-      const groupedData = data.reduce((acc, candidate) => {
-        if (!acc[candidate.position]) {
-          acc[candidate.position] = [];
-        }
-        acc[candidate.position].push({
-          name: candidate.name,
-          votes: candidate.votes.length,
-          voters: candidate.votes.map(vote => vote.voter_id).filter(voter => voter !== null)
-        });
-        return acc;
-      }, [] as any[]);
-
-      setElectionData(groupedData);
-    }
-    setLoading(false);
-  };
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    await supabase.auth.signOut();
-    setLoggingOut(false);
-    router.push('/');
-  };
+    fetchElectionData();
+  }, []);
 
   return (
     <div className="min-h-screen p-8 bg-gray-100">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-800">Admin Election Dashboard</h1>
-        <Button variant="outline" onClick={handleLogout} className="bg-yellow-500/90" disabled={loggingOut}>
-          {loggingOut ? <Loader className="animate-spin mr-2" /> : "Logout"}
-        </Button>
+        <h1 className="text-4xl font-bold text-gray-800">Election Results</h1>
       </div>
       {loading ? (
         <div className="flex justify-center items-center h-64">
