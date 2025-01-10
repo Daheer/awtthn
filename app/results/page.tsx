@@ -38,7 +38,6 @@ export default function ResultsPage() {
           acc[candidate.position].push({
             name: candidate.name,
             votes: candidate.votes.length,
-            voters: candidate.votes.map(vote => vote.voter_id).filter(voter => voter !== null)
           });
           return acc;
         }, [] as any[]);
@@ -73,41 +72,13 @@ export default function ResultsPage() {
                     <TableRow>
                       <TableHead className="bg-gray-200 text-gray-700">Candidate Name</TableHead>
                       <TableHead className="bg-gray-200 text-gray-700">Vote Count</TableHead>
-                      <TableHead className="bg-gray-200 text-gray-700">Voters (IDs)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {candidates.map((candidate: { name: string; votes: number; voters: string[] }) => (
+                    {candidates.map((candidate: { name: string; votes: number }) => (
                       <TableRow key={candidate.name} className="even:bg-gray-50">
                         <TableCell className="p-3">{candidate.name}</TableCell>
                         <TableCell className="p-3">{candidate.votes}</TableCell>
-                        <TableCell className="p-3">
-                          <div className="flex flex-wrap gap-2">
-                            {candidate.voters.slice(0, 5).map((voter, index) => (
-                              <span key={index} className="inline-block bg-gray-200 rounded-sm px-5 py-2 text-sm font-medium text-gray-700">
-                                {voter}
-                              </span>
-                            ))}
-                            {candidate.voters.length > 5 && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button variant="outline">...</Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <div className="flex flex-wrap gap-2">
-                                      {candidate.voters.map((voter, index) => (
-                                        <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
-                                          {voter}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                          </div>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
