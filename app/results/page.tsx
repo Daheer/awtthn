@@ -3,9 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@/components/ui/table";
 import { Loader } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function formatPosition(str: String) {
     return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); 
@@ -67,22 +65,14 @@ export default function ResultsPage() {
                 <CardTitle className="text-2xl font-semibold">{formatPosition(position)}'s Office</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <Table className="w-full border">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="bg-gray-200 text-gray-700">Candidate Name</TableHead>
-                      <TableHead className="bg-gray-200 text-gray-700">Vote Count</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {candidates.map((candidate: { name: string; votes: number }) => (
-                      <TableRow key={candidate.name} className="even:bg-gray-50">
-                        <TableCell className="p-3">{candidate.name}</TableCell>
-                        <TableCell className="p-3">{candidate.votes}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {candidates.map((candidate: { name: string; votes: number }) => (
+                    <div key={candidate.name} className="bg-gray-200 p-4 rounded-lg shadow-md">
+                      <h2 className="text-xl font-bold">{candidate.name}</h2>
+                      <p className="text-4xl font-extrabold text-center">{candidate.votes}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           ))}
